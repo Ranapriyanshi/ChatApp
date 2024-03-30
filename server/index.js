@@ -9,11 +9,13 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000"
+        origin: "*",
+        methods: ["GET", "POST"],
+        credentials: true
     }
 })
 
-app.use(express.json());
+// app.use(express.json());
 
 io.on('connection', (socket) => {
     console.log(socket.id)
@@ -23,9 +25,9 @@ io.on('connection', (socket) => {
     })
 })
 
-const port = process.env.PORT || 4000;
-server.listen(port, function () {
-    console.log('Listening on port ' + port)
+// const port = process.env.PORT || 4000;
+server.listen(8176, function () {
+    console.log('Listening on port ' + 8176)
 })
 
 app.get('/', function (req, res) {
