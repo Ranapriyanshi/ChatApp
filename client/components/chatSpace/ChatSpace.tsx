@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { createRef, useRef } from "react";
 import styles from "./chatSpace.module.scss";
 import { useEffect, useState } from "react";
 import socket from "@/socket";
@@ -25,8 +25,8 @@ const ChatSpace = () => {
       });
     };
   }, []);
-
-  socket.on("recieve_message", (msg) => {
+  
+  socket.on("recieve_message", (msg: string) => {
     setMessages([...messages, { text: msg, type: "recieved" }]);
   });
 
@@ -35,10 +35,23 @@ const ChatSpace = () => {
   }
 
   function handleClick() {
-    socket.emit("send_message", input);
-    setMessages([...messages, { text: input, type: "sent" }]);
-    setInput("");
+    if (input.length > 0) {
+      socket.emit("send_message", input);
+      setMessages([...messages, { text: input, type: "sent" }]);
+      setInput("");
+    } else {
+      console.error("message can't be empty")
+    }
   }
+
+  const display = function (e: messageObj, i: number) {
+    return (
+      <div key={i} className={styles[e.type]}>
+        {e.text}
+      </div>
+    )
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.chatInfo}></div>
@@ -46,11 +59,7 @@ const ChatSpace = () => {
       <hr className={styles.infoDivider} />
 
       <div className={styles.chatsContainer}>
-        {messages.map((e, i) => (
-          <div key={i} className={styles[e.type]}>
-            {e.text}
-          </div>
-        ))}
+        {messages.map(display)}
       </div>
 
       <div className={styles.inputContainer}>
