@@ -1,0 +1,53 @@
+.messageNavContainer {
+    display: flex;
+    flex-direction: column;
+    width: 25%;
+}
+
+.messageHeader {
+    display: flex;
+}
+
+.chatWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+.chatPersonContainer {
+    padding: 15px 10px;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+.chatPerson {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.selectedChat {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: 4px 4px 10px var(--dark-grey);
+}
+.nameAndAvatar {
+    display: flex;
+    gap: 10px;
+}
+.nameAndMessage {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2.5px;
+}
+.chatName {
+    font-weight: 500;
+}
+.newMessage {
+    font-size: 0.9em;
+}
+.avatar {
+    border-radius: 50%;
+}
+.chatTime {
+    font-size: 0.9em;
+}
