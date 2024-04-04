@@ -10,24 +10,28 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*",
-        methods: ["GET", "POST"],
-        credentials: true
+        methods: ["GET", "POST"]
     }
 })
 
-// app.use(express.json());
+app.use(express.json());
 
 io.on('connection', (socket) => {
     console.log(socket.id)
 
+    socket.on('join_room', (data) => {
+        socket.join(data)
+        console.log('User joined room: ' + data)
+    })
+
     socket.on('send_message', (msg) => {
-        socket.broadcast.emit('recieve_message', msg)
+        socket.to(msg.id).emit('recieve_message', msg.input)
     })
 })
 
-// const port = process.env.PORT || 4000;
-server.listen(8176, function () {
-    console.log('Listening on port ' + 8176)
+const port = process.env.PORT || 4000;
+server.listen(port, function () {
+    console.log('Listening on port ' + port)
 })
 
 app.get('/', function (req, res) {

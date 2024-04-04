@@ -1,13 +1,16 @@
-import ChatsNav from "@/components/chatsNavigation/ChatsNav";
+import ChatsNav from "@/app/components/chatsNavigation/ChatsNav";
 import styles from "./page.module.scss";
-import ChatSpace from "@/components/chatSpace/ChatSpace";
+import ChatSpace from "@/app/components/chatSpace/ChatSpace";
+import { RoomContextProvider } from "./context/RoomContext";
 
 export default function Home() {
   return (
     <main className={styles.main}>
-      <ChatsNav />
-      <hr />
-      <ChatSpace />
+      <RoomContextProvider>
+        <ChatsNav />
+        <hr />
+        <ChatSpace />
+      </RoomContextProvider>
     </main>
   );
 }
