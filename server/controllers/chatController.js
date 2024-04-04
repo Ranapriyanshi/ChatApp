@@ -39,29 +39,29 @@ async function getChats(req, res) {
 }
 
 async function updateChat(req, res) {
-  const { chatId, messageContent, userId } = req.body;
+  const { roomId, messageContent, userId } = req.body;
 
-  if (!chatId || !messageContent) {
+  if (!roomId || !messageContent) {
     return res
       .status(400)
       .json({ msg: "Chat ID and message content required" });
   }
 
-  const message = await Message.create({
-    content: messageContent,
-    sender: userId,
-    chat: chatId,
-  });
-
-  const chat = await Chat.findById(chatId).and({ users: userId });
+  const chat = await Chat.findOne({ users: userId, room: roomId });
 
   if (!chat) {
     return res.status(404).json({ msg: "Chat not found" });
   }
 
-  chat.updateOne({ $push: { messages: message._id } });
+  const message = await Message.create({
+    content: messageContent,
+    sender: userId,
+    chat: chat._id,
+  });
 
-  res.json({ chat });
+  chat.updateOne({ $push: { messages: message._id } }).exec();
+
+  return res.json({ chat });
 }
 
 export { createChat, getChats, updateChat };

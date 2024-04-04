@@ -1,10 +1,11 @@
 "use client";
 
-import React, { createRef, useRef } from "react";
+import React, { createRef, use, useRef } from "react";
 import styles from "./chatSpace.module.scss";
 import { useEffect, useState } from "react";
 import socket from "@/socket";
 import { useRoomContext } from "@/app/context/RoomContext";
+import { useAuthContext } from "@/app/context/AuthContext";
 
 type messageObj = {
   text: string;
@@ -14,7 +15,12 @@ type messageObj = {
 const ChatSpace = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Array<messageObj>>([]);
-  const { state } = useRoomContext();
+  const { state: roomState } = useRoomContext();
+  const { state: authState } = useAuthContext();
+
+  useEffect(() => {
+    console.log(authState)
+  }, [authState])
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -37,9 +43,8 @@ const ChatSpace = () => {
   }
 
   function handleClick() {
-    console.log(state.currentRoom)
     if (input.length > 0) {
-      socket.emit("send_message", {input, id: state.currentRoom});
+      socket.emit("send_message", {input, id: roomState.currentRoom});
       setMessages([...messages, { text: input, type: "sent" }]);
       setInput("");
     } else {

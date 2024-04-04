@@ -26,21 +26,19 @@ async function login(req, res) {
   }
 
   // Check if password is correct
-  compare(password, user.password, function (err, result) {
-    if (err) {
-      return res.status(400).json({ msg: "Incorrect password" });
-    }
-    if (result) {
-      const token = generateToken(user);
-      const resUser = {
-        f_name: user.f_name,
-        l_name: user.l_name,
-        email: user.email,
-        username: user.username,
-      };
-      return res.json({ token, resUser });
-    }
-  });
+  const match = await compare(password, user.password);
+  if (!match) {
+    return res.status(400).json({ msg: "Incorrect username or password" });
+  }
+
+  // Create token
+  const token = generateToken(user);
+  const resUser = user.toJSON()
+  delete resUser.password;
+  delete resUser.created_at;
+  delete resUser.__v;
+
+  return res.status(201).json({ token, user: resUser });
 }
 
 function tokenLogin(req, res) {
@@ -58,13 +56,10 @@ function tokenLogin(req, res) {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-    const resUser = {
-      f_name: user.f_name,
-      l_name: user.l_name,
-      email: user.email,
-      username: user.username,
-    };
-    return res.json({ resUser });
+    const resUser = user.toJSON()
+    delete resUser.password;
+
+    return res.status(201).json({ user: resUser });
   });
 }
 
@@ -118,10 +113,10 @@ async function signup(req, res) {
 
   // Create token
   const token = generateToken(user);
+  const resUser = user.toJSON()
+  delete resUser.password;
 
-  const resUser = { f_name, l_name, email, username };
-
-  return res.json({ token, resUser });
+  return res.status(201).json({ token, user: resUser });
 }
 
 async function searchUser(req, res) {
@@ -132,13 +127,11 @@ async function searchUser(req, res) {
     return res.status(404).json({ msg: "User not found" });
   }
 
-  const resUser = {
-    f_name: user.f_name,
-    l_name: user.l_name,
-    email: user.email,
-    username: user.username,
-  };
-  return res.json({ resUser });
+  const resUser = user.toJSON()
+  delete resUser.password;
+  delete resUser.created_at;
+  delete resUser.__v;
+  return res.status(200).json({ user: resUser });
 }
 
 export { login, tokenLogin, signup, searchUser };

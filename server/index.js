@@ -1,10 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from 'cors'
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { router as userRouter } from "./routes/userRoutes.js";
 import { router as chatRouter } from "./routes/chatRoutes.js";
+import { router as messageRouter } from "./routes/messageRoutes..js";
 
 dotenv.config();
 
@@ -20,9 +22,15 @@ const io = new Server(server, {
 app.use(express.json());
 
 app.use((req, res, next) => {
-    console.log(req.method + " " + req.path)
-    next();
-})
+  console.log(req.method + " " + req.path);
+  next();
+});
+
+app.use(cors(
+  {
+    origin: "http://localhost:3000"
+  }
+))
 
 io.on("connection", (socket) => {
   console.log(socket.id);
@@ -45,8 +53,9 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 });
 
 app.get("/", function (req, res) {
-    res.json({ msg: "Welcome to ChatApp" });
+  res.json({ msg: "Welcome to ChatApp" });
 });
 
 app.use("/api/users", userRouter);
 app.use("/api/chats", chatRouter);
+app.use("/api/messages", messageRouter);
