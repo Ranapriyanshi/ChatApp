@@ -1,20 +1,21 @@
+'use client'
+
 import Image from "next/image";
 import image from "@/public/channels4_profile.jpg";
 import styles from "./chatsNav.module.scss";
+import { User } from "@/app/stores/userStore";
+import { Room } from "@/app/stores/roomStore";
 
-type user = {
-  id: number;
-  name: string;
-};
+function ChatList(e: User, handleClick: Function, active: Room | null, rooms: Room[]) {
+  const room = rooms.find((r) => r.users.includes(e._id));
 
-function ChatList(e: user, handleClick: Function, active: number) {
   return (
-    <div key={e.id}>
+    <div key={e._id}>
       <div
         className={`${styles.chatPersonContainer} ${
-          e.id == active ? styles.selectedChat : ""
+          active?.users && active?.users.includes(e._id) ? styles.selectedChat : ""
         }`}
-        onClick={() => handleClick(e.id)}
+        onClick={() => handleClick(room)}
       >
         <div className={styles.chatPerson}>
           <div className={styles.nameAndAvatar}>
@@ -26,7 +27,7 @@ function ChatList(e: user, handleClick: Function, active: number) {
               alt=""
             />
             <div className={styles.nameAndMessage}>
-              <p className={styles.chatName}>{e.name}</p>
+              <p className={styles.chatName}>{e.username}</p>
               <p className={styles.newMessage}>Hey there! I am using ChatApp</p>
             </div>
           </div>
@@ -38,4 +39,4 @@ function ChatList(e: user, handleClick: Function, active: number) {
   );
 }
 
-export default ChatList
+export default ChatList;

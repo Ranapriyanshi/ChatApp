@@ -27,9 +27,9 @@ async function createChat(req, res) {
 }
 
 async function getChats(req, res) {
-  const { user } = req.body;
+  const { user } = req.headers;
 
-  if (!user) {
+  if (user == "") {
     return res.status(400).json({ msg: "User required" });
   }
 
@@ -61,7 +61,7 @@ async function updateChat(req, res) {
 
   chat.updateOne({ $push: { messages: message._id } }).exec();
 
-  return res.json({ chat });
+  return res.json({ message });
 }
 
 export { createChat, getChats, updateChat };

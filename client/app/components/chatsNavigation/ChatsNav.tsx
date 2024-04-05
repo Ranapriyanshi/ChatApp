@@ -3,33 +3,72 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./chatsNav.module.scss";
 import ChatList from "./ChatList";
-import { useRoomContext } from "@/app/context/RoomContext";
+import useRoomStore, { Room } from "@/app/stores/roomStore";
 import socket from "@/socket";
+import useUserStore from "@/app/stores/userStore";
 
 const ChatsNav = () => {
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState<Room | null>(null);
   const [search, setSearch] = useState({});
-  const { state, dispatch } = useRoomContext();
+  const { currentRoom, rooms, users, setCurrentRoom, setRooms, setUsers } =
+    useRoomStore();
+  const { user } = useUserStore();
 
-  const users = [
-    { id: 1, name: "John Doe" },
-    { id: 2, name: "Golu Singh" },
-    { id: 3, name: "Titu Mama" },
-    { id: 4, name: "Happy Oye" },
-    { id: 5, name: "Sad Oyo" },
-  ];
+  useEffect(() => {
+    async function fetchUsers(users: Array<string>) {
+      const resp = await fetch(process.env.NEXT_PUBLIC_SERVER_URI + "/users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          users: users.join(","),
+        },
+      });
 
-  function handleClick(i: number) {
+      const data = await resp.json();
+
+      if (!data.msg) {
+        setUsers(data.users);
+      } else {
+        console.log(data.msg);
+      }
+    }
+    async function fetchChats() {
+      const resp = await fetch(process.env.NEXT_PUBLIC_SERVER_URI + "/chats", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          user: user ? user._id : "",
+        },
+      });
+      const data = await resp.json();
+
+      if (resp.ok) {
+        let users: string[] = [];
+        data.chats.forEach((e: any) => {
+          users.push(e.users.filter((e: string) => e != user?._id));
+        });
+
+        setRooms(data.chats);
+        fetchUsers(users);
+      } else {
+        console.log(data.msg);
+      }
+    }
+    if (user) {
+      fetchChats();
+    }
+  }, [user, setRooms, setUsers]);
+
+  function handleClick(i: Room | null) {
+    console.log(i)
     if (active != i) {
       setActive(i);
-      socket.emit("join_room", `${i}`);
-      dispatch({ type: "SET_CURRENT_ROOM", rooms: [], currentRoom: `${i}` });
-      console.log(state.currentRoom)
-    }
-    else {
-      setActive(0);
-      socket.emit("join_room", '0');
-      dispatch({ type: "SET_CURRENT_ROOM", rooms: [], currentRoom: '0' })
+      socket.emit("join_room", i?.room);
+      setCurrentRoom(i);
+    } else {
+      setActive(null);
+      socket.emit("join_room", "0");
+      setCurrentRoom(null);
     }
   }
 
@@ -38,20 +77,21 @@ const ChatsNav = () => {
     return (args: any) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => {
-        func(args)
+        func(args);
       }, 1000);
-    }
-  }
+    };
+  };
   const debounce = useCallback(cb(handleChange), []);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const nameToSearch = e.target.value.toLowerCase();
     if (nameToSearch != "") {
-      const user = users.filter(u => u.name.toLowerCase().includes(nameToSearch));
-      if (user) setSearch(user)
+      const user = users.filter((u) =>
+        u.username.toLowerCase().includes(nameToSearch)
+      );
+      if (user) setSearch(user);
     }
   }
-  
 
   return (
     <div className={styles.messageNavContainer}>
@@ -64,7 +104,7 @@ const ChatsNav = () => {
         <div className={styles.searchBox}>
           <input type="text" placeholder="Search chats" onChange={debounce} />
         </div>
-        {users.map((e) => ChatList(e, handleClick, active))}
+        {users && users.map((e) => ChatList(e, handleClick, active, rooms))}
       </div>
     </div>
   );
