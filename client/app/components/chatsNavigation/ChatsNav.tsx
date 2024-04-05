@@ -33,10 +33,6 @@ const ChatsNav = () => {
     }
   }
 
-  useEffect(() => {
-    console.log(search)
-  }, [search])
-
   const cb = (func: Function) => {
     let timeout: NodeJS.Timeout;
     return (args: any) => {
