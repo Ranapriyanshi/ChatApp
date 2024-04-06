@@ -37,13 +37,16 @@ const ChatSpace = () => {
 
   useEffect(() => {
     async function fetchMessages() {
-      const resp = await fetch(process.env.NEXT_PUBLIC_SERVER_URI + "/messages", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          chatId: currentRoom ? currentRoom._id : "",
-        },
-      });
+      const resp = await fetch(
+        process.env.NEXT_PUBLIC_SERVER_URI + "/messages",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            chatId: currentRoom ? currentRoom._id : "",
+          },
+        }
+      );
 
       const data = await resp.json();
 
@@ -73,9 +76,9 @@ const ChatSpace = () => {
       {
         method: "POST",
         body: JSON.stringify({
-          messageContent: msg,
-          roomId: currentRoom?._id,
-          userId: user?._id,
+          content: msg,
+          roomid: currentRoom?.room,
+          userid: user?._id,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -87,15 +90,15 @@ const ChatSpace = () => {
 
     if (!data.msg) {
       setMessages([...messages, data.message]);
+      socket.emit("send_message", { input: data.message, id: currentRoom?.room });
       setInput("");
     } else {
       console.log(data.msg);
     }
   }
-  
+
   function handleClick() {
     if (input.length > 0) {
-      socket.emit("send_message", { input, id: currentRoom?.room });
       postMessage(input);
     } else {
       console.error("message can't be empty");
@@ -112,6 +115,16 @@ const ChatSpace = () => {
       </div>
     );
   };
+
+  function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      handleClick();
+    }
+  }
+
+  function handleErrorClick() {
+    console.error("Please select a room");
+  }
 
   const chatUser = users.find(
     (e) => e._id == currentRoom?.users?.filter((usr) => usr != user?._id)[0]
@@ -134,7 +147,9 @@ const ChatSpace = () => {
 
           <hr className={styles.infoDivider} />
 
-          <div className={styles.chatsContainer}>{messages && messages.map(display)}</div>
+          <div className={styles.chatsContainer}>
+            {messages && messages.map(display)}
+          </div>
 
           <div className={styles.inputContainer}>
             <input
@@ -142,8 +157,11 @@ const ChatSpace = () => {
               placeholder="Type something here"
               onChange={handleChange}
               value={input}
+              onKeyDown={handleKeyPress}
             />
-            <button onClick={handleClick}>Send</button>
+            <button onClick={currentRoom ? handleClick : handleErrorClick}>
+              Send
+            </button>
           </div>
         </div>
       ) : (

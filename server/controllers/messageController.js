@@ -10,15 +10,13 @@ async function getMessages(req, res) {
 
   const chat = await Chat.findById(chatid);
 
-  console.log(chat)
-
   if (!chat) {
     return res.status(404).json({ msg: "Chat not found" });
   }
 
   const messages = await Message.find({ chat: chatid });
 
-  return res.json({ messages });
+  return res.status(200).json({ messages });
 }
 
 export { getMessages };
