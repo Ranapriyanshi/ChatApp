@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuthContext } from "../context/AuthContext";
+import useUserStore from "../stores/userStore";
 
 const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { state, dispatch } = useAuthContext();
+  const { setUser } = useUserStore();
 
   function handleUsername(e: React.ChangeEvent<HTMLInputElement>) {
     setUsernameOrEmail(e.target.value);
@@ -27,8 +27,7 @@ const Login = () => {
       .then((resp) => resp.json())
       .then((data) => {
         if (!data.msg) {
-          dispatch({ type: "LOGIN", payload: data.user})
-          console.log(state);
+          setUser(data.user);
         } else {
           console.log("Failed to log in.");
         }

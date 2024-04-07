@@ -1,8 +1,11 @@
 // Major Container
-.container {
+.wrapper {
     width: 70%;
-    height: 90vh;
-    border-radius: 20px;
+}
+
+.container {
+    height: 85vh;
+    border-radius: 17px;
     padding: 1vh 4vh;
     display: flex;
     flex-direction: column;
@@ -10,6 +13,36 @@
     align-items: center;
     background-color: white;
     color: black;
+    margin-top: 2vh;
+}
+
+.headerContainer {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+
+    img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+}
+
+.profileContainer {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    img {
+        width: 45px;
+        height: 45px;
+    }
 }
 
 // Navbar which containes chat info

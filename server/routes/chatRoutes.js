@@ -4,7 +4,7 @@ import { createChat, getChats, updateChat } from "../controllers/chatController.
 const router = express.Router();
 
 router.post("/create", createChat);
-router.post("/", getChats);
+router.get("/", getChats);
 router.post("/update", updateChat);
 
 export { router };

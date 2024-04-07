@@ -2,22 +2,21 @@ import Message from "../models/messageModel.js";
 import Chat from "../models/chatModel.js";
 
 async function getMessages(req, res) {
-  const { chatId } = req.body;
+  const { chatid } = req.headers;
 
-  if (!chatId) {
+  if (chatid == "") {
     return res.status(400).json({ msg: "Chat ID required" });
   }
 
-  const chat = await Chat.findById(chatId);
+  const chat = await Chat.findById(chatid);
 
   if (!chat) {
     return res.status(404).json({ msg: "Chat not found" });
   }
 
-  const messages = await Message.find({ chat: chatId });
+  const messages = await Message.find({ chat: chatid });
 
-  return res.json({ messages });
+  return res.status(200).json({ messages });
 }
-
 
 export { getMessages };

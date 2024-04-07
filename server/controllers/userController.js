@@ -33,7 +33,7 @@ async function login(req, res) {
 
   // Create token
   const token = generateToken(user);
-  const resUser = user.toJSON()
+  const resUser = user.toJSON();
   delete resUser.password;
   delete resUser.created_at;
   delete resUser.__v;
@@ -56,7 +56,7 @@ function tokenLogin(req, res) {
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
     }
-    const resUser = user.toJSON()
+    const resUser = user.toJSON();
     delete resUser.password;
 
     return res.status(201).json({ user: resUser });
@@ -113,7 +113,7 @@ async function signup(req, res) {
 
   // Create token
   const token = generateToken(user);
-  const resUser = user.toJSON()
+  const resUser = user.toJSON();
   delete resUser.password;
 
   return res.status(201).json({ token, user: resUser });
@@ -127,11 +127,30 @@ async function searchUser(req, res) {
     return res.status(404).json({ msg: "User not found" });
   }
 
-  const resUser = user.toJSON()
+  const resUser = user.toJSON();
   delete resUser.password;
   delete resUser.created_at;
   delete resUser.__v;
   return res.status(200).json({ user: resUser });
 }
 
-export { login, tokenLogin, signup, searchUser };
+async function getUsers(req, res) {
+  const arr = req.headers.users.split(",");
+
+  // const arr = userIds.split(",");
+  if (arr.length < 1) {
+    res.status(400).json({ msg: "Users required" });
+  }
+  const users = await User.find({ _id: { $in: arr } });
+
+  const resUsers = users.map((user) => {
+    const resUser = user.toJSON();
+    delete resUser.password;
+    delete resUser.created_at;
+    delete resUser.__v;
+    return resUser;
+  });
+  res.json({ users: resUsers });
+}
+
+export { login, tokenLogin, signup, searchUser, getUsers };
