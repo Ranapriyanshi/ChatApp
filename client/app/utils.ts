@@ -1,3 +1,5 @@
+import { Bounce, toast, TypeOptions } from "react-toastify";
+
 function debounceCallback(fn: Function, delay: number) {
   const cb = (func: Function) => {
     let timeout: NodeJS.Timeout;
@@ -12,4 +14,19 @@ function debounceCallback(fn: Function, delay: number) {
   return cb(fn);
 }
 
-export { debounceCallback };
+function toaster (type: string, msg: string) {
+    toast(msg, {
+      type: type as TypeOptions,
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
+}
+
+export { debounceCallback, toaster };

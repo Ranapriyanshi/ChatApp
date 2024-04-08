@@ -1,0 +1,27 @@
+.inputContainer {
+    width: 80%;
+    background-color: white;
+    border-radius: 5px;
+    height: 40px;
+    margin: 10px 0;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    input {
+        width: 100%;
+        height: 100%;
+        border: none;
+        font-size: 0.9em;
+        color: var(--input-color);
+
+        &:focus-visible {
+            outline: none;
+        }
+    }
+
+    .suffix:hover {
+        cursor: pointer;
+    }
+}

@@ -8,6 +8,7 @@ import socket from "@/socket";
 import useUserStore, { User } from "@/app/stores/userStore";
 import useUsersStore from "@/app/stores/usersStore";
 import { debounceCallback as cb } from "@/app/utils";
+import SearchModal from "../searchModal/SearchModal";
 
 const ChatsNav = () => {
   const [active, setActive] = useState<Room | null>(null);
@@ -47,12 +48,16 @@ const ChatsNav = () => {
       const data = await resp.json();
 
       if (resp.ok) {
-        let arr: string[] = [];
-        data.chats.forEach((e: any) => {
-          arr.push(e.users.filter((e: string) => e != user?._id));
-        });
         setRooms(data.chats);
-        fetchUsers(arr);
+        if (data.chats.length > 0) {
+          let arr: string[] = [];
+          data.chats.forEach((e: any) => {
+            arr.push(e.users.filter((e: string) => e != user?._id));
+          });
+          fetchUsers(arr);
+        } else {
+          setUsers([]);
+        }
       } else {
         console.log(data.msg);
       }
@@ -100,6 +105,7 @@ const ChatsNav = () => {
         <h3>Messages</h3>
         <button>+</button>
       </div>
+      <SearchModal />
 
       <div className={styles.chatWrapper}>
         <div className={styles.searchBox}>
