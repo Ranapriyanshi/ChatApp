@@ -43,24 +43,30 @@ async function login(req, res) {
 
 function tokenLogin(req, res) {
   const token = req.headers["authorization"].split(" ")[1];
+  console.log(token);
   if (!token) {
     return res.status(400).json({ msg: "Token not found" });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, async function (err, decoded) {
-    if (err) {
-      return res.status(400).json({ msg: "Invalid token" });
-    }
+  jwt.verify(
+    token,
+    process.env.JWT_SECRET,
+    { algorithms: process.env.JWT_ALGORITHM },
+    async function (err, decoded) {
+      if (err) {
+        return res.status(400).json({ msg: "Invalid token" });
+      }
 
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(404).json({ msg: "User not found" });
-    }
-    const resUser = user.toJSON();
-    delete resUser.password;
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+      }
+      const resUser = user.toJSON();
+      delete resUser.password;
 
-    return res.status(201).json({ user: resUser });
-  });
+      return res.status(201).json({ user: resUser });
+    }
+  );
 }
 
 async function signup(req, res) {
@@ -122,16 +128,19 @@ async function signup(req, res) {
 async function searchUser(req, res) {
   const { username } = req.query;
 
-  const user = await User.findOne({ username: username });
-  if (!user) {
+  const users = await User.find({ username: { $regex: username, $options: 'i' } });
+  if (!users) {
     return res.status(404).json({ msg: "User not found" });
   }
 
-  const resUser = user.toJSON();
-  delete resUser.password;
-  delete resUser.created_at;
-  delete resUser.__v;
-  return res.status(200).json({ user: resUser });
+  const resUsers = users.map((user) => {
+    const resUser = user.toJSON();
+    delete resUser.password;
+    delete resUser.created_at;
+    delete resUser.__v;
+    return resUser;
+  });
+  return res.status(200).json({ users: resUsers });
 }
 
 async function getUsers(req, res) {

@@ -1,0 +1,17 @@
+.searchContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 30vh;
+    width: 25vw;
+    position: absolute;
+    top: 5vh;
+    right: -1vh;
+    border-radius: 10px;
+    background-color: white;
+
+    div {
+        border: 2px solid var(--grey-color);
+        width: 95%;
+    }
+}
