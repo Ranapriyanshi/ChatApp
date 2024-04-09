@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Image from "next/image";
 import image from "@/public/channels4_profile.jpg";
@@ -6,14 +6,28 @@ import styles from "./chatsNav.module.scss";
 import { User } from "@/app/stores/userStore";
 import { Room } from "@/app/stores/roomStore";
 
-function ChatList(e: User, handleClick: Function, active: Room | null, rooms: Room[]) {
+interface ChatListProps {
+  e: User;
+  handleClick: Function;
+  active: Room | null;
+  rooms: Room[];
+}
+
+const ChatList: React.FC<ChatListProps> = ({
+  e,
+  handleClick,
+  active,
+  rooms,
+}) => {
   const room = rooms.find((r) => r.users.includes(e._id));
 
   return (
     <div key={e._id}>
       <div
         className={`${styles.chatPersonContainer} ${
-          active?.users && active?.users.includes(e._id) ? styles.selectedChat : ""
+          active?.users && active?.users.includes(e._id)
+            ? styles.selectedChat
+            : ""
         }`}
         onClick={() => handleClick(room)}
       >
@@ -37,6 +51,6 @@ function ChatList(e: User, handleClick: Function, active: Room | null, rooms: Ro
       <hr />
     </div>
   );
-}
+};
 
 export default ChatList;

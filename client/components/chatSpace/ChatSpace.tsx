@@ -5,9 +5,11 @@ import styles from "./chatSpace.module.scss";
 import { useEffect, useState } from "react";
 import socket from "@/socket";
 import useRoomStore from "@/app/stores/roomStore";
-import useUserStore from "@/app/stores/userStore";
+import useUserStore, { User } from "@/app/stores/userStore";
 import Image from "next/image";
 import image from "@/public/channels4_profile.jpg";
+import { toaster } from "@/app/utils";
+import useUsersStore from "@/app/stores/usersStore";
 
 type MessageObj = {
   _id: string;
@@ -20,17 +22,19 @@ type MessageObj = {
 const ChatSpace = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Array<MessageObj>>([]);
-  const { currentRoom, rooms, users } = useRoomStore();
+  const [chatUser, setChatUser] = useState<User>();
+  const { currentRoom, rooms } = useRoomStore();
+  const { users } = useUsersStore()
   const { user } = useUserStore();
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("connected", socket.id);
+      toaster("success", "Ready to Chat");
     });
 
     return () => {
       socket.on("disconnect", () => {
-        console.log("disconnected", socket.id);
+        toaster("error", "Disconnected! can not send messages");
       });
     };
   }, []);
@@ -53,7 +57,7 @@ const ChatSpace = () => {
       if (!data.msg) {
         setMessages(data.messages);
       } else {
-        console.log(data.msg);
+        toaster("error", data.msg);
       }
     }
 
@@ -90,10 +94,13 @@ const ChatSpace = () => {
 
     if (!data.msg) {
       setMessages([...messages, data.message]);
-      socket.emit("send_message", { input: data.message, id: currentRoom?.room });
+      socket.emit("send_message", {
+        input: data.message,
+        id: currentRoom?.room,
+      });
       setInput("");
     } else {
-      console.log(data.msg);
+      toaster("error", data.msg);
     }
   }
 
@@ -101,7 +108,7 @@ const ChatSpace = () => {
     if (input.length > 0) {
       postMessage(input);
     } else {
-      console.error("message can't be empty");
+      toaster("error", "Message can't be empty");
     }
   }
 
@@ -123,26 +130,29 @@ const ChatSpace = () => {
   }
 
   function handleErrorClick() {
-    console.error("Please select a room");
+    toaster("error", "Please select a room");
   }
 
-  const chatUser = users.find(
-    (e) => e._id == currentRoom?.users?.filter((usr) => usr != user?._id)[0]
-  );
+  useEffect(() => {
+    if (user && currentRoom && users) {
+      const userId = currentRoom.users.find((e) => e != user._id);
+      setChatUser(users.find((usr) => usr._id == userId));
+    }
+  }, [currentRoom, users, user]);
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.headerContainer}>
-        <h1>Chat Space</h1>
+        {/* <h1>Chat Space</h1> */}
+          <h1>Hi, {user ? user.f_name : <button>Login</button>}</h1>
         <div className={styles.profileContainer}>
-          <h4>Hi, {user ? user.username : "Login"}</h4>
-          <Image src={image} alt=""></Image>
+          <Image src={`https://api.dicebear.com/8.x/lorelei/jpg?seed=john`} alt="" width={50} height={50} />
         </div>
       </div>
       {currentRoom ? (
         <div className={styles.container}>
           <div className={styles.chatInfo}>
-            <h3>{chatUser?.f_name}</h3>
+            <h3 style={{color: 'black'}}>{chatUser && chatUser.f_name}</h3>
           </div>
 
           <hr className={styles.infoDivider} />

@@ -5,41 +5,41 @@ import styles from "./page.module.scss";
 import ChatSpace from "@/components/chatSpace/ChatSpace";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
   useEffect(() => {
-    const user = localStorage.getItem("user");
     const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
     if (!user || !token) {
       window.location.href = "/auth";
     }
 
-    async function tokenLogin() {
+    async function tokenLogin(token: string) {
       const resp = await fetch(
         process.env.NEXT_PUBLIC_SERVER_URI + "/users/tokenLogin",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "authorization": "Bearer " + token,
+            authorization: "Bearer " + token,
           },
-          body: JSON.stringify({ token }),
         }
       );
-
       const data = await resp.json();
       if (data.msg) {
-        window.location.href = "/auth";
+        router.push("/auth");
       } else {
-        window.location.href = "/";
+        router.push("/");
       }
     }
 
-    if (!user && !token) {
-      tokenLogin();
-    }
-  }, []);
+    token && tokenLogin(token);
+  }, [router]);
 
   return (
     <>

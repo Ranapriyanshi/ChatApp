@@ -9,9 +9,55 @@
     right: -1vh;
     border-radius: 10px;
     background-color: white;
+    box-shadow: 2px 2px 5px var(--dark-grey);
 
-    div {
+    .searchInput {
         border: 2px solid var(--grey-color);
         width: 95%;
+        border-radius: 10px;
+        height: 40px;
+        margin: 10px 0;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            font-size: 0.9em;
+            color: var(--input-color);
+
+            &:focus-visible {
+                outline: none;
+            }
+        }
+    }
+}
+
+.usersContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 10px;
+
+    .user {
+        display: flex;
+        align-items: center;
+        /* justify-content: space-between; */
+        padding: 10px;
+        width: 95%;
+        border-radius: 6px;
+        box-shadow: 0px 0px 5px #00000033;
+
+        .details {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
     }
 }
