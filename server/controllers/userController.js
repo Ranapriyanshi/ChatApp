@@ -43,7 +43,6 @@ async function login(req, res) {
 
 function tokenLogin(req, res) {
   const token = req.headers["authorization"].split(" ")[1];
-  console.log(token);
   if (!token) {
     return res.status(400).json({ msg: "Token not found" });
   }
@@ -127,10 +126,15 @@ async function signup(req, res) {
 
 async function searchUser(req, res) {
   const { username } = req.query;
+  const { user } = req.headers;
 
-  const users = await User.find({ username: { $regex: username, $options: 'i' } });
+  const users = await User.find({
+    username: { $regex: new RegExp(username, "i") },
+  })
+    .where("_id")
+    .ne(user);
   if (!users) {
-    return res.status(404).json({ msg: "User not found" });
+    return res.status(404).json({ msg: "No User found" });
   }
 
   const resUsers = users.map((user) => {
