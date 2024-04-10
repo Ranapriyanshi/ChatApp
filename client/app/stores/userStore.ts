@@ -7,6 +7,7 @@ export type User = {
   l_name: string | null;
   username: string;
   email: string;
+  pic: string;
 }
 
 type UserStore = {

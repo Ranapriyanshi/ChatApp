@@ -128,7 +128,7 @@ const ChatsNav = () => {
         </div>
         {searching ? (
           <div>Searching...</div>
-        ) : searchedUsers.length == 0 && search.length == 0 ? (
+        ) : search.length == 0 ? (
           users &&
           users.map((e, i) => (
             <ChatList

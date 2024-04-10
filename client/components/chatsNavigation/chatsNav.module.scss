@@ -92,16 +92,18 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: 2.5px;
+        gap: 5px;
+
+        .chatName {
+            font-weight: 500;
+        }
+    
+        .newMessage {
+            font-size: 0.9em;
+            justify-self: flex-end;
+        }
     }
 
-    .chatName {
-        font-weight: 500;
-    }
-
-    .newMessage {
-        font-size: 0.9em;
-    }
 
     .avatar {
         border-radius: 50%;
