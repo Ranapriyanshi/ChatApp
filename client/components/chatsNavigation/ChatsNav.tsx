@@ -7,11 +7,12 @@ import useRoomStore, { Room } from "@/app/stores/roomStore";
 import socket from "@/socket";
 import useUserStore, { User } from "@/app/stores/userStore";
 import useUsersStore from "@/app/stores/usersStore";
-import { debounceCallback as cb } from "@/app/utils";
+import { debounceCallback as cb, toaster } from "@/app/utils";
 import SearchModal from "../searchModal/SearchModal";
 
 const ChatsNav = () => {
   const [active, setActive] = useState<Room | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState<Array<User>>([]);
   const [search, setSearch] = useState("");
   const [searching, setSearching] = useState(false);
@@ -34,7 +35,7 @@ const ChatsNav = () => {
       if (!data.msg) {
         setUsers(data.users);
       } else {
-        console.log(data.msg);
+        toaster("error", data.msg);
       }
     }
     async function fetchChats() {
@@ -59,7 +60,7 @@ const ChatsNav = () => {
           setUsers([]);
         }
       } else {
-        console.log(data.msg);
+        toaster("error", data.msg);
       }
     }
     if (user) {
@@ -68,7 +69,6 @@ const ChatsNav = () => {
   }, [user, setRooms, setUsers]);
 
   function handleClick(i: Room | null) {
-    console.log(i);
     if (active != i) {
       setActive(i);
       socket.emit("join_room", i?.room);
@@ -84,6 +84,10 @@ const ChatsNav = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => cb(handleChange, 1000)(e),
     [users]
   );
+
+  function handleModal() {
+    setModalOpen(!modalOpen);
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const nameToSearch = e.target.value.toLowerCase();
@@ -101,11 +105,13 @@ const ChatsNav = () => {
   }
   return (
     <div className={styles.messageNavContainer}>
-      <div className={styles.messageHeader}>
+      <div className={styles.messageHeader} onClick={handleModal}>
         <h3>Messages</h3>
-        <button>+</button>
+        <button className={modalOpen ? styles.closeBtn : ''}>+</button>
       </div>
-      <SearchModal />
+      <div className={`${styles.modalContainer} ${!modalOpen ? styles.close : styles.open}`}>
+        <SearchModal />
+      </div>
 
       <div className={styles.chatWrapper}>
         <div className={styles.searchBox}>
@@ -123,12 +129,29 @@ const ChatsNav = () => {
         {searching ? (
           <div>Searching...</div>
         ) : searchedUsers.length == 0 && search.length == 0 ? (
-          users && users.map((e) => ChatList(e, handleClick, active, rooms))
+          users &&
+          users.map((e, i) => (
+            <ChatList
+              key={i}
+              e={e}
+              rooms={rooms}
+              active={active}
+              handleClick={handleClick}
+            />
+          ))
         ) : searchedUsers.length == 0 && search.length > 0 ? (
           <h2>No Users Found</h2>
         ) : (
           searchedUsers &&
-          searchedUsers.map((e) => ChatList(e, handleClick, active, rooms))
+          searchedUsers.map((e, i) => (
+            <ChatList
+              key={i}
+              e={e}
+              rooms={rooms}
+              active={active}
+              handleClick={handleClick}
+            />
+          ))
         )}
       </div>
     </div>

@@ -2,10 +2,15 @@ import React, { useCallback, useEffect, useState } from "react";
 import Input from "../Input/Input";
 import image from "@/public/channels4_profile.jpg";
 import styles from "./searchModal.module.scss";
-import { debounceCallback } from "@/app/utils";
+import { debounceCallback, toaster } from "@/app/utils";
+import useUserStore, { User } from "@/app/stores/userStore";
+import ChatList from "../chatsNavigation/ChatList";
+import UserList from "./UserList";
 
 const SearchModal = () => {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState<Array<User>>([]);
+  const { user } = useUserStore();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSearch(e.target.value);
@@ -25,6 +30,7 @@ const SearchModal = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            user: user ? user._id : "",
           },
         }
       );
@@ -32,26 +38,35 @@ const SearchModal = () => {
       const data = await resp.json();
 
       if (!data.msg) {
-        console.log(data.users);
+        setUsers(data.users);
       } else {
-        console.log(data.msg);
+        toaster("error", data.msg);
       }
     }
 
-    if (search && search.length > 2) {
+    if (search.length > 0) {
       fetchUsers();
+    } else {
+      setUsers([]);
     }
-  }, [search]);
+  }, [search, user]);
 
   return (
     <div className={styles.searchContainer}>
       <Input
         type="text"
-        placeholder="Search Users"
-        prefix={image}
+        placeholder="Search for users..."
+        prefixImg={image}
         onChange={debounce}
+        divClass={styles.searchInput}
       />
-      <div></div>
+      <div className={styles.usersContainer}>
+        {search.length > 0 && users.length == 0 ? (
+          <h3>No Users Found</h3>
+        ) : (
+          users.map((e, i) => <UserList key={i} user={e} />)
+        )}
+      </div>
     </div>
   );
 };

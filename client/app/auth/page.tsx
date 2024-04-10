@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import useUserStore from "@/app/stores/userStore";
 import styles from "./login.module.scss";
 import { toaster } from "../utils";
-import { toast } from "react-toastify";
 import Input from "@/components/Input/Input";
 import image from "@/public/channels4_profile.jpg";
 import usernameImage from "@/public/Account.png";
@@ -47,7 +46,7 @@ const Login = () => {
 
   async function handleSignupSubmit() {
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      toaster("error", "Passwords do not match");
       return;
     }
 
@@ -146,15 +145,15 @@ const Login = () => {
               placeholder="Username or Email"
               onChange={handleUsername}
               value={usernameOrEmail}
-              prefix={usernameImage}
+              prefixImg={usernameImage}
             />
             <Input
               type={eye["pass1"] ? "password" : "text"}
               placeholder="Password"
               onChange={handlePassword}
               value={password}
-              prefix={passwordImage}
-              suffix={eye["pass1"] ? eyeImage : closedEyeImage}
+              prefixImg={passwordImage}
+              suffixImg={eye["pass1"] ? eyeImage : closedEyeImage}
               onEyeClick={() => handleEyeClick("pass1")}
             />
             <button onClick={handleLoginSubmit}>Submit</button>
@@ -179,14 +178,14 @@ const Login = () => {
                 placeholder="First Name"
                 value={firstName}
                 onChange={(e) => handleChange(e, "firstName")}
-                prefix={usernameImage}
+                prefixImg={usernameImage}
               />
               <Input
                 type="text"
                 placeholder="Last Name (Optional)"
                 value={lastName}
                 onChange={(e) => handleChange(e, "lastName")}
-                prefix={usernameImage}
+                prefixImg={usernameImage}
               />
             </div>
             <Input
@@ -194,14 +193,14 @@ const Login = () => {
               placeholder="Username"
               value={username}
               onChange={(e) => handleChange(e, "username")}
-              prefix={usernameImage}
+              prefixImg={usernameImage}
             />
             <Input
               type="text"
               placeholder="Email"
               value={email}
               onChange={(e) => handleChange(e, "email")}
-              prefix={emailImage}
+              prefixImg={emailImage}
             />
             <div className={styles.split}>
               <Input
@@ -209,8 +208,8 @@ const Login = () => {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => handleChange(e, "password")}
-                prefix={passwordImage}
-                suffix={eye["pass2"] ? eyeImage : closedEyeImage}
+                prefixImg={passwordImage}
+                suffixImg={eye["pass2"] ? eyeImage : closedEyeImage}
                 onEyeClick={() => handleEyeClick("pass2")}
               />
               <Input
@@ -218,8 +217,8 @@ const Login = () => {
                 placeholder="Confirm Password"
                 value={confirmPassword}
                 onChange={(e) => handleChange(e, "confirmPassword")}
-                prefix={passwordImage}
-                suffix={eye["pass3"] ? eyeImage : closedEyeImage}
+                prefixImg={passwordImage}
+                suffixImg={eye["pass3"] ? eyeImage : closedEyeImage}
                 onEyeClick={() => handleEyeClick("pass3")}
               />
             </div>

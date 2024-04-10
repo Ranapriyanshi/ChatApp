@@ -2,41 +2,29 @@ import React from "react";
 import Image, { StaticImageData } from "next/image";
 import styles from "./input.module.scss";
 
-interface InputProps {
-  type: string;
-  placeholder: string;
-  prefix: StaticImageData;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  value?: string;
-  suffix?: StaticImageData;
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  prefixImg: StaticImageData;
+  suffixImg?: StaticImageData;
+  divClass?: string;
   onEyeClick?: () => void;
 }
 
 const Input: React.FC<InputProps> = ({
-  type,
-  placeholder,
-  prefix,
-  onChange,
-  value,
-  suffix,
+  prefixImg,
+  suffixImg,
+  divClass,
   onEyeClick,
+  ...props
 }) => {
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    onChange(e);
-  }
-
   return (
-    <div className={styles.inputContainer}>
-      <Image src={prefix} alt="prefix" width={20} height={20} />
+    <div className={divClass ? divClass : styles.inputContainer}>
+      <Image src={prefixImg} alt="prefix" width={20} height={20} />
       <input
-        type={type}
-        placeholder={placeholder}
-        onChange={handleChange}
-        value={value}
+        {...props}
       />
-      {suffix && (
+      {suffixImg && (
         <Image
-          src={suffix}
+          src={suffixImg}
           alt="suffix"
           width={20}
           height={20}
