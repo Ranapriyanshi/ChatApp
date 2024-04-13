@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import useUserStore from "@/app/stores/userStore";
+import useUserStore from "@/stores/userStore";
 import styles from "./login.module.scss";
-import { toaster } from "../utils";
+import { toaster } from "../../utils";
 import Input from "@/components/Input/Input";
 import image from "@/public/channels4_profile.jpg";
 import usernameImage from "@/public/Account.png";

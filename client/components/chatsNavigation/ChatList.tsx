@@ -1,38 +1,39 @@
 "use client";
 
 import Image from "next/image";
-import image from "@/public/channels4_profile.jpg";
 import styles from "./chatsNav.module.scss";
-import { User } from "@/app/stores/userStore";
-import { Room } from "@/app/stores/roomStore";
+import { User } from "@/stores/userStore";
+import { Room } from "@/stores/roomStore";
 import { useEffect, useState } from "react";
+import socket from "@/socket";
+import useMessageStore, {
+  Message,
+  UnseenMessages,
+} from "@/stores/messageStore";
 
 interface ChatListProps {
   e: User;
   handleClick: Function;
   active: Room | null;
+  unseenMessages: Array<UnseenMessages>;
   rooms: Room[];
-}
-
-type Message = {
-  content: string;
-  sender: string;
-  chat: string;
-  created_at: string;
 }
 
 const ChatList: React.FC<ChatListProps> = ({
   e,
   handleClick,
   active,
+  unseenMessages,
   rooms,
 }) => {
-  const [latestMsg, setLatestMsg] = useState<Message>();
+  const [latestMsg, setLatestMsg] = useState<Message | null>();
   const [time, setTime] = useState<string>("");
-  const room = rooms.find((r) => r.users.includes(e._id));
+  const { setUnseenMessages } = useMessageStore();
+  const room = rooms.find((r) => r.users.includes(e._id)) || null;
+  const unseen = unseenMessages.find((e) => e.room?._id == room?._id);
+
   useEffect(() => {
     const id = room?.messages[room.messages.length - 1];
-
     if (id) {
       fetch(process.env.NEXT_PUBLIC_SERVER_URI + `/messages/${id}`, {
         method: "GET",
@@ -42,17 +43,61 @@ const ChatList: React.FC<ChatListProps> = ({
       })
         .then((res) => res.json())
         .then((data) => {
-          setLatestMsg(data.message);
-          const time = new Date(data.message.created_at);
-          const today = new Date();
-          if (today.getDate() == time.getDate()) {
-            setTime(time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+          if (data.message) {
+            setLatestMsg(data.message);
+            const time = new Date(data.message.created_at);
+            const today = new Date();
+            if (today.getDate() == time.getDate()) {
+              setTime(
+                time.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              );
+            } else {
+              setTime(time.toLocaleDateString());
+            }
           } else {
-            setTime(time.toLocaleDateString());
+            setLatestMsg(null);
+            setTime("");
           }
         });
     }
   }, [room]);
+
+  socket.on("recieve_message", (data) => {
+    if (data.chat == room?._id) {
+      setLatestMsg(data);
+      const time = new Date(data.created_at);
+      const today = new Date();
+      if (today.getDate() == time.getDate()) {
+        setTime(
+          time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        );
+      } else {
+        setTime(time.toLocaleDateString());
+      }
+    }
+
+    if (data.chat == room?._id && (!active || active._id != room?._id)) {
+      setUnseenMessages(data, room);
+    }
+  });
+
+  socket.on("my_message", (data) => {
+    if (data.chat == room?._id) {
+      setLatestMsg(data);
+      const time = new Date(data.created_at);
+      const today = new Date();
+      if (today.getDate() == time.getDate()) {
+        setTime(
+          time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        );
+      } else {
+        setTime(time.toLocaleDateString());
+      }
+    }
+  });
 
   return (
     <div key={e._id}>
@@ -75,10 +120,13 @@ const ChatList: React.FC<ChatListProps> = ({
             />
             <div className={styles.nameAndMessage}>
               <p className={styles.chatName}>{e.username}</p>
-              <p className={styles.newMessage}>{latestMsg?.content}</p>
+              <p className={styles.latestMessage}>{latestMsg?.content}</p>
             </div>
           </div>
-          <span className={styles.chatTime}>{time}</span>
+          <div className={styles.timeAndNotify}>
+            <span className={styles.chatTime}>{time}</span>
+            {unseen && <div className={styles.notify}>{unseen.messages.length}</div>}
+          </div>
         </div>
       </div>
       <hr />

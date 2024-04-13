@@ -1,11 +1,11 @@
-import useUserStore, { User } from "@/app/stores/userStore";
+import useUserStore, { User } from "@/stores/userStore";
 import React from "react";
 import Image from "next/image";
 import image from "@/public/channels4_profile.jpg";
 import styles from "./searchModal.module.scss";
-import useRoomStore from "@/app/stores/roomStore";
-import { toaster } from "@/app/utils";
-import useUsersStore from "@/app/stores/usersStore";
+import useRoomStore from "@/stores/roomStore";
+import { toaster } from "@/utils";
+import useUsersStore from "@/stores/usersStore";
 
 interface UserListProps {
   user: User;

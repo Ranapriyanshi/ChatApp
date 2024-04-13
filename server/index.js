@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_ORIGIN,
     methods: ["GET", "POST"],
   })
 );
@@ -42,9 +42,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (msg) => {
-    const inst = await io.in(msg.id).fetchSockets();
-    if (inst.length == 1) socket.broadcast.emit("recieve_message", msg.input);
-    else socket.to(msg.id).emit("recieve_message", msg.input);
+    socket.to(msg.id).emit("recieve_message", msg.input);
+    socket.emit("my_message", msg.input);
   });
 });
 

@@ -60,21 +60,66 @@
 }
 
 // Chats in the nav
+
+
 .chatWrapper {
     display: flex;
     flex-direction: column;
     margin-top: 30px;
 
+    
     .chatPersonContainer {
         padding: 15px 10px;
         margin-bottom: 2px;
         cursor: pointer;
     }
-
+    
     .chatPerson {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        .nameAndAvatar {
+            display: flex;
+            gap: 10px;
+        }
+    
+        .nameAndMessage {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+    
+            .chatName {
+                font-weight: 500;
+            }
+    
+            .latestMessage {
+                font-size: 0.9em;
+                justify-self: flex-end;
+            }
+        }
+    
+        .avatar {
+            border-radius: 50%;
+        }
+    
+        .chatTime {
+            font-size: 0.9em;
+        }
+        .timeAndNotify {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+
+            .notify {
+                background-color: var(--blue-color);
+                color: white;
+                border-radius: 50%;
+                padding: 1px 5px;
+                font-size: 0.8em;
+            }
+        }
     }
 
     .selectedChat {
@@ -83,35 +128,6 @@
         box-shadow: 4px 4px 10px var(--dark-grey);
     }
 
-    .nameAndAvatar {
-        display: flex;
-        gap: 10px;
-    }
-
-    .nameAndMessage {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 5px;
-
-        .chatName {
-            font-weight: 500;
-        }
-    
-        .newMessage {
-            font-size: 0.9em;
-            justify-self: flex-end;
-        }
-    }
-
-
-    .avatar {
-        border-radius: 50%;
-    }
-
-    .chatTime {
-        font-size: 0.9em;
-    }
 }
 
 // Search Modal

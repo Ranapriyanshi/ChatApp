@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import Input from "../Input/Input";
 import image from "@/public/channels4_profile.jpg";
 import styles from "./searchModal.module.scss";
-import { debounceCallback, toaster } from "@/app/utils";
-import useUserStore, { User } from "@/app/stores/userStore";
+import { debounceCallback, toaster } from "@/utils";
+import useUserStore, { User } from "@/stores/userStore";
 import ChatList from "../chatsNavigation/ChatList";
 import UserList from "./UserList";
 

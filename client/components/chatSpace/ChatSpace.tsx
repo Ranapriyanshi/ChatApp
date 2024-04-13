@@ -1,28 +1,20 @@
 "use client";
 
-import React, { createRef, use, useRef } from "react";
+import React, { createRef, useRef } from "react";
 import styles from "./chatSpace.module.scss";
 import { useEffect, useState } from "react";
 import socket from "@/socket";
-import useRoomStore from "@/app/stores/roomStore";
-import useUserStore, { User } from "@/app/stores/userStore";
+import useRoomStore from "@/stores/roomStore";
+import useUserStore, { User } from "@/stores/userStore";
 import Image from "next/image";
-import image from "@/public/channels4_profile.jpg";
-import { toaster } from "@/app/utils";
-import useUsersStore from "@/app/stores/usersStore";
+import { toaster } from "@/utils";
+import useUsersStore from "@/stores/usersStore";
 import Notification from "../notification/Notification";
-
-type MessageObj = {
-  _id: string;
-  content: string;
-  sender: string;
-  chat: string;
-  createdAt: string;
-};
+import { Message } from "@/stores/messageStore";
 
 const ChatSpace = () => {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Array<MessageObj>>([]);
+  const [messages, setMessages] = useState<Array<Message>>([]);
   const [chatUser, setChatUser] = useState<User>();
   const { currentRoom, rooms } = useRoomStore();
   const { users } = useUsersStore();
@@ -31,15 +23,15 @@ const ChatSpace = () => {
   useEffect(() => {
     socket.on("connect", () => {
       toaster("success", "Ready to Chat");
-      socket.emit("active", user?._id);
     });
+    socket.emit("join_room", user?._id);
 
     return () => {
       socket.on("disconnect", () => {
         toaster("error", "Disconnected! can not send messages");
       });
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     async function fetchMessages() {
@@ -68,8 +60,8 @@ const ChatSpace = () => {
     }
   }, [currentRoom]);
 
-  socket.on("recieve_message", (msg: MessageObj) => {
-    setMessages([...messages, msg]);
+  socket.on("recieve_message", (data: Message) => {
+    if (data.chat == currentRoom?._id) setMessages([...messages, data]);
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -98,7 +90,7 @@ const ChatSpace = () => {
       setMessages([...messages, data.message]);
       socket.emit("send_message", {
         input: data.message,
-        id: currentRoom?.room,
+        id: chatUser?._id,
       });
       setInput("");
     } else {
@@ -114,7 +106,7 @@ const ChatSpace = () => {
     }
   }
 
-  const display = function (e: MessageObj, i: number) {
+  const display = function (e: Message, i: number) {
     return (
       <div
         key={i}
@@ -146,7 +138,6 @@ const ChatSpace = () => {
     <div className={styles.wrapper}>
       {user && (
         <div className={styles.headerContainer}>
-          {/* <h1>Chat Space</h1> */}
           <h1>Hi, {user.f_name}</h1>
           <div className={styles.profileContainer}>
             <Notification />
