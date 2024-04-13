@@ -9,7 +9,6 @@ import useUserStore, { User } from "@/stores/userStore";
 import Image from "next/image";
 import { toaster } from "@/utils";
 import useUsersStore from "@/stores/usersStore";
-import Notification from "../notification/Notification";
 import { Message } from "@/stores/messageStore";
 
 const ChatSpace = () => {
@@ -140,7 +139,6 @@ const ChatSpace = () => {
         <div className={styles.headerContainer}>
           <h1>Hi, {user.f_name}</h1>
           <div className={styles.profileContainer}>
-            <Notification />
             <Image src={user.pic} alt="" width={50} height={50} />
           </div>
         </div>
