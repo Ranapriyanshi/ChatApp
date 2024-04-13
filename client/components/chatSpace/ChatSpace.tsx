@@ -10,6 +10,7 @@ import Image from "next/image";
 import image from "@/public/channels4_profile.jpg";
 import { toaster } from "@/app/utils";
 import useUsersStore from "@/app/stores/usersStore";
+import Notification from "../notification/Notification";
 
 type MessageObj = {
   _id: string;
@@ -24,12 +25,13 @@ const ChatSpace = () => {
   const [messages, setMessages] = useState<Array<MessageObj>>([]);
   const [chatUser, setChatUser] = useState<User>();
   const { currentRoom, rooms } = useRoomStore();
-  const { users } = useUsersStore()
+  const { users } = useUsersStore();
   const { user } = useUserStore();
 
   useEffect(() => {
     socket.on("connect", () => {
       toaster("success", "Ready to Chat");
+      socket.emit("active", user?._id);
     });
 
     return () => {
@@ -142,18 +144,24 @@ const ChatSpace = () => {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.headerContainer}>
-        {/* <h1>Chat Space</h1> */}
-          <h1>Hi, {user ? user.f_name : <button>Login</button>}</h1>
-        <div className={styles.profileContainer}>
-          <Image src={`https://api.dicebear.com/8.x/lorelei/jpg?seed=john`} alt="" width={50} height={50} />
+      {user && (
+        <div className={styles.headerContainer}>
+          {/* <h1>Chat Space</h1> */}
+          <h1>Hi, {user.f_name}</h1>
+          <div className={styles.profileContainer}>
+            <Notification />
+            <Image src={user.pic} alt="" width={50} height={50} />
+          </div>
         </div>
-      </div>
+      )}
       {currentRoom ? (
         <div className={styles.container}>
-          <div className={styles.chatInfo}>
-            <h3 style={{color: 'black'}}>{chatUser && chatUser.f_name}</h3>
-          </div>
+          {chatUser && (
+            <div className={styles.chatInfo}>
+              <Image src={chatUser.pic} alt="" width={50} height={50} />
+              <h3 style={{ color: "black" }}>{chatUser.f_name}</h3>
+            </div>
+          )}
 
           <hr className={styles.infoDivider} />
 

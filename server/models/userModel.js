@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    pic: {
+        type: String,
+        default: 'https://res.cloudinary.com/drgcwhci4/image/upload/v1712742384/czvjcgbpvixn7p3t25ns.png'
+    },
     created_at: {
         type: Date,
         default: Date.now,

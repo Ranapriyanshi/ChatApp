@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import cors from 'cors'
+import cors from "cors";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { router as userRouter } from "./routes/userRoutes.js";
@@ -26,12 +26,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cors(
-  {
+app.use(
+  cors({
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
-  }
-))
+  })
+);
 
 io.on("connection", (socket) => {
   console.log(socket.id);
@@ -41,8 +41,10 @@ io.on("connection", (socket) => {
     console.log("User joined room: " + data);
   });
 
-  socket.on("send_message", (msg) => {
-    socket.to(msg.id).emit("recieve_message", msg.input);
+  socket.on("send_message", async (msg) => {
+    const inst = await io.in(msg.id).fetchSockets();
+    if (inst.length == 1) socket.broadcast.emit("recieve_message", msg.input);
+    else socket.to(msg.id).emit("recieve_message", msg.input);
   });
 });
 
