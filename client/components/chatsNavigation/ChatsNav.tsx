@@ -3,29 +3,34 @@
 import React, { useCallback, useEffect, useState } from "react";
 import styles from "./chatsNav.module.scss";
 import ChatList from "./ChatList";
-import useRoomStore, { Room } from "@/app/stores/roomStore";
-import socket from "@/socket";
-import useUserStore, { User } from "@/app/stores/userStore";
-import useUsersStore from "@/app/stores/usersStore";
-import { debounceCallback as cb, toaster } from "@/app/utils";
+import useRoomStore, { Room } from "@/stores/roomStore";
+import useUserStore, { User } from "@/stores/userStore";
+import useUsersStore from "@/stores/usersStore";
+import { debounceCallback as cb, toaster } from "@/utils";
 import SearchModal from "../searchModal/SearchModal";
+import useMessageStore from "@/stores/messageStore";
 
 const ChatsNav = () => {
   const [active, setActive] = useState<Room | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState<Array<User>>([]);
+  const [token, setToken] = useState<string>("");
   const [search, setSearch] = useState("");
   const [searching, setSearching] = useState(false);
-  const { currentRoom, rooms, setCurrentRoom, setRooms } = useRoomStore();
+  const { rooms, setCurrentRoom, setRooms } = useRoomStore();
+  const { unseenMessages, removeUnseenMessages } = useMessageStore();
   const { users, setUsers } = useUsersStore();
   const { user } = useUserStore();
 
   useEffect(() => {
+    setToken(localStorage.getItem("token") || "");
+
     async function fetchUsers(arr: Array<string>) {
       const resp = await fetch(process.env.NEXT_PUBLIC_SERVER_URI + "/users", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
           users: arr.join(","),
         },
       });
@@ -43,6 +48,7 @@ const ChatsNav = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
           user: user ? user._id : "",
         },
       });
@@ -66,16 +72,15 @@ const ChatsNav = () => {
     if (user) {
       fetchChats();
     }
-  }, [user, setRooms, setUsers]);
+  }, [user, setRooms, setUsers, token]);
 
   function handleClick(i: Room | null) {
     if (active != i) {
       setActive(i);
-      socket.emit("join_room", i?.room);
+      removeUnseenMessages(i);
       setCurrentRoom(i);
     } else {
       setActive(null);
-      socket.emit("join_room", "0");
       setCurrentRoom(null);
     }
   }
@@ -100,9 +105,11 @@ const ChatsNav = () => {
     setSearch(nameToSearch);
     setSearching(false);
   }
+
   function searchingFn() {
     setSearching(true);
   }
+
   return (
     <div className={styles.messageNavContainer}>
       <div className={styles.messageHeader} onClick={handleModal}>
@@ -136,6 +143,7 @@ const ChatsNav = () => {
               e={e}
               rooms={rooms}
               active={active}
+              unseenMessages={unseenMessages}
               handleClick={handleClick}
             />
           ))
@@ -148,6 +156,7 @@ const ChatsNav = () => {
               key={i}
               e={e}
               rooms={rooms}
+              unseenMessages={unseenMessages}
               active={active}
               handleClick={handleClick}
             />

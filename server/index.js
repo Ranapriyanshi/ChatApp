@@ -7,6 +7,8 @@ import { createServer } from "node:http";
 import { router as userRouter } from "./routes/userRoutes.js";
 import { router as chatRouter } from "./routes/chatRoutes.js";
 import { router as messageRouter } from "./routes/messageRoutes..js";
+import User from "./models/userModel.js";
+import { tokenLogin } from "./controllers/userController.js";
 
 dotenv.config();
 
@@ -14,7 +16,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: process.env.CLIENT_ORIGIN,
     methods: ["GET", "POST"],
   },
 });
@@ -28,10 +30,21 @@ app.use((req, res, next) => {
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.CLIENT_ORIGIN,
     methods: ["GET", "POST"],
   })
 );
+
+app.use((req, res, next) => {
+  const nonSecurePaths = ["/api/users/login", "/api/users/signup"];
+
+  if (nonSecurePaths.includes(req.path)) return next();
+
+  const token = req.headers.authorization;
+  if (!token) return res.status(401).json({ msg: "Unauthorized" });
+
+  tokenLogin(req, res, next);
+});
 
 io.on("connection", (socket) => {
   console.log(socket.id);
@@ -42,9 +55,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send_message", async (msg) => {
-    const inst = await io.in(msg.id).fetchSockets();
-    if (inst.length == 1) socket.broadcast.emit("recieve_message", msg.input);
-    else socket.to(msg.id).emit("recieve_message", msg.input);
+    socket.to(msg.id).emit("recieve_message", msg.input);
+    socket.emit("my_message", msg.input);
   });
 });
 

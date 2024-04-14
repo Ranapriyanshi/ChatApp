@@ -35,4 +35,24 @@ async function getMessage(req, res) {
   return res.status(200).json({ message });
 }
 
-export { getMessages, getMessage };
+async function updateMessage(req, res) {
+  const { id } = req.params;
+  const { text } = req.body;
+
+  if (id == "") {
+    return res.status(400).json({ msg: "Message ID required" });
+  }
+
+  const message = await Message.findById(id);
+
+  if (!message) {
+    return res.status(404).json({ msg: "Message not found" });
+  }
+
+  message.content = text;
+  await message.save();
+
+  return res.status(200).json({ message });
+}
+
+export { getMessages, getMessage, updateMessage };

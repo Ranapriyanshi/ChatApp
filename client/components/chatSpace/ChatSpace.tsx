@@ -1,47 +1,44 @@
 "use client";
 
-import React, { createRef, use, useRef } from "react";
+import React, { createRef, useRef } from "react";
 import styles from "./chatSpace.module.scss";
 import { useEffect, useState } from "react";
 import socket from "@/socket";
-import useRoomStore from "@/app/stores/roomStore";
-import useUserStore, { User } from "@/app/stores/userStore";
+import useRoomStore from "@/stores/roomStore";
+import useUserStore, { User } from "@/stores/userStore";
 import Image from "next/image";
-import image from "@/public/channels4_profile.jpg";
-import { toaster } from "@/app/utils";
-import useUsersStore from "@/app/stores/usersStore";
-import Notification from "../notification/Notification";
-
-type MessageObj = {
-  _id: string;
-  content: string;
-  sender: string;
-  chat: string;
-  createdAt: string;
-};
+import { toaster } from "@/utils";
+import useUsersStore from "@/stores/usersStore";
+import { Message } from "@/stores/messageStore";
 
 const ChatSpace = () => {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Array<MessageObj>>([]);
+  const [messages, setMessages] = useState<Array<Message>>([]);
+  const [token, setToken] = useState<string>("");
   const [chatUser, setChatUser] = useState<User>();
+
   const { currentRoom, rooms } = useRoomStore();
   const { users } = useUsersStore();
   const { user } = useUserStore();
 
+  const chatRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     socket.on("connect", () => {
       toaster("success", "Ready to Chat");
-      socket.emit("active", user?._id);
     });
+    socket.emit("join_room", user?._id);
 
     return () => {
       socket.on("disconnect", () => {
         toaster("error", "Disconnected! can not send messages");
       });
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
+    setToken(localStorage.getItem("token") || "");
+
     async function fetchMessages() {
       const resp = await fetch(
         process.env.NEXT_PUBLIC_SERVER_URI + "/messages",
@@ -49,6 +46,7 @@ const ChatSpace = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
             chatId: currentRoom ? currentRoom._id : "",
           },
         }
@@ -66,10 +64,16 @@ const ChatSpace = () => {
     if (currentRoom) {
       fetchMessages();
     }
-  }, [currentRoom]);
+  }, [currentRoom, token]);
 
-  socket.on("recieve_message", (msg: MessageObj) => {
-    setMessages([...messages, msg]);
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  });
+
+  socket.on("recieve_message", (data: Message) => {
+    if (data.chat == currentRoom?._id) setMessages([...messages, data]);
   });
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -88,6 +92,7 @@ const ChatSpace = () => {
         }),
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
       }
     );
@@ -98,7 +103,7 @@ const ChatSpace = () => {
       setMessages([...messages, data.message]);
       socket.emit("send_message", {
         input: data.message,
-        id: currentRoom?.room,
+        id: chatUser?._id,
       });
       setInput("");
     } else {
@@ -113,17 +118,6 @@ const ChatSpace = () => {
       toaster("error", "Message can't be empty");
     }
   }
-
-  const display = function (e: MessageObj, i: number) {
-    return (
-      <div
-        key={i}
-        className={e.sender == user?._id ? styles.sent : styles.recieved}
-      >
-        {e.content}
-      </div>
-    );
-  };
 
   function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
@@ -146,10 +140,8 @@ const ChatSpace = () => {
     <div className={styles.wrapper}>
       {user && (
         <div className={styles.headerContainer}>
-          {/* <h1>Chat Space</h1> */}
           <h1>Hi, {user.f_name}</h1>
           <div className={styles.profileContainer}>
-            <Notification />
             <Image src={user.pic} alt="" width={50} height={50} />
           </div>
         </div>
@@ -165,8 +157,33 @@ const ChatSpace = () => {
 
           <hr className={styles.infoDivider} />
 
-          <div className={styles.chatsContainer}>
-            {messages && messages.map(display)}
+          <div className={styles.chatsContainer} ref={chatRef}>
+            {messages &&
+              messages.map((e, i) => {
+                const time = new Date(e.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                return (
+                  <div
+                    key={i}
+                    className={
+                      e.sender == user?._id
+                        ? styles.sentContainer
+                        : ""
+                    }
+                  >
+                    <span>{time}</span>
+                    <div
+                      className={
+                        e.sender == user?._id ? styles.sent : styles.recieved
+                      }
+                    >
+                      {e.content}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
 
           <div className={styles.inputContainer}>
@@ -183,7 +200,7 @@ const ChatSpace = () => {
           </div>
         </div>
       ) : (
-        <div>Lets start chatting</div>
+        <h1 className={styles.noChatMsg}>Lets start chatting</h1>
       )}
     </div>
   );
