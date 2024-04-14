@@ -10,6 +10,7 @@ import UserList from "./UserList";
 const SearchModal = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<Array<User>>([]);
+  const [token, setToken] = useState<string>("");
   const { user } = useUserStore();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -23,6 +24,8 @@ const SearchModal = () => {
   );
 
   useEffect(() => {
+    setToken(localStorage.getItem("token") || "");
+
     async function fetchUsers() {
       const resp = await fetch(
         process.env.NEXT_PUBLIC_SERVER_URI + `/users/search?username=${search}`,
@@ -30,6 +33,7 @@ const SearchModal = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
             user: user ? user._id : "",
           },
         }
@@ -49,7 +53,7 @@ const SearchModal = () => {
     } else {
       setUsers([]);
     }
-  }, [search, user]);
+  }, [search, user, token]);
 
   return (
     <div className={styles.searchContainer}>
@@ -64,7 +68,7 @@ const SearchModal = () => {
         {search.length > 0 && users.length == 0 ? (
           <h3>No Users Found</h3>
         ) : (
-          users.map((e, i) => <UserList key={i} user={e} />)
+          users.map((e, i) => <UserList key={i} user={e} token={token} />)
         )}
       </div>
     </div>

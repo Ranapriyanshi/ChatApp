@@ -14,6 +14,7 @@ const ChatsNav = () => {
   const [active, setActive] = useState<Room | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [searchedUsers, setSearchedUsers] = useState<Array<User>>([]);
+  const [token, setToken] = useState<string>("");
   const [search, setSearch] = useState("");
   const [searching, setSearching] = useState(false);
   const { rooms, setCurrentRoom, setRooms } = useRoomStore();
@@ -22,11 +23,14 @@ const ChatsNav = () => {
   const { user } = useUserStore();
 
   useEffect(() => {
+    setToken(localStorage.getItem("token") || "");
+
     async function fetchUsers(arr: Array<string>) {
       const resp = await fetch(process.env.NEXT_PUBLIC_SERVER_URI + "/users", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
           users: arr.join(","),
         },
       });
@@ -44,6 +48,7 @@ const ChatsNav = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
           user: user ? user._id : "",
         },
       });
@@ -67,7 +72,7 @@ const ChatsNav = () => {
     if (user) {
       fetchChats();
     }
-  }, [user, setRooms, setUsers]);
+  }, [user, setRooms, setUsers, token]);
 
   function handleClick(i: Room | null) {
     if (active != i) {

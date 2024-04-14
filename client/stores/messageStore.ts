@@ -8,7 +8,7 @@ export type Message = {
   sender: string;
   chat: string;
   seen: boolean;
-  createdAt: string;
+  created_at: string;
 };
 
 export type UnseenMessages = {

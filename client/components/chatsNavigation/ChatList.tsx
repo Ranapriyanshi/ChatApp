@@ -26,19 +26,24 @@ const ChatList: React.FC<ChatListProps> = ({
   unseenMessages,
   rooms,
 }) => {
-  const [latestMsg, setLatestMsg] = useState<Message | null>();
   const [time, setTime] = useState<string>("");
+  const [token, setToken] = useState<string>("");
+  const [latestMsg, setLatestMsg] = useState<Message | null>();
   const { setUnseenMessages } = useMessageStore();
+
   const room = rooms.find((r) => r.users.includes(e._id)) || null;
   const unseen = unseenMessages.find((e) => e.room?._id == room?._id);
 
   useEffect(() => {
+    setToken(localStorage.getItem("token") || "");
+
     const id = room?.messages[room.messages.length - 1];
     if (id) {
       fetch(process.env.NEXT_PUBLIC_SERVER_URI + `/messages/${id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
       })
         .then((res) => res.json())
@@ -63,7 +68,7 @@ const ChatList: React.FC<ChatListProps> = ({
           }
         });
     }
-  }, [room]);
+  }, [room, token]);
 
   socket.on("recieve_message", (data) => {
     if (data.chat == room?._id) {

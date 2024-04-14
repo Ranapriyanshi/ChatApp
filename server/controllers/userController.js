@@ -41,7 +41,7 @@ async function login(req, res) {
   return res.status(201).json({ token, user: resUser });
 }
 
-function tokenLogin(req, res) {
+function tokenLogin(req, res, next) {
   const token = req.headers["authorization"].split(" ")[1];
   if (!token) {
     return res.status(400).json({ msg: "Token not found" });
@@ -53,17 +53,17 @@ function tokenLogin(req, res) {
     { algorithms: process.env.JWT_ALGORITHM },
     async function (err, decoded) {
       if (err) {
-        return res.status(400).json({ msg: "Invalid token" });
+        return res.status(401).json({ msg: "Unauthorized" });
       }
 
       const user = await User.findById(decoded.id);
       if (!user) {
-        return res.status(404).json({ msg: "User not found" });
+        return res.status(401).json({ msg: "Unauthorized" });
       }
       const resUser = user.toJSON();
       delete resUser.password;
 
-      return res.status(201).json({ user: resUser });
+      next();
     }
   );
 }
@@ -165,5 +165,9 @@ async function getUsers(req, res) {
   });
   res.json({ users: resUsers });
 }
+
+// async function updateUser(req, res) {
+
+// }
 
 export { login, tokenLogin, signup, searchUser, getUsers };

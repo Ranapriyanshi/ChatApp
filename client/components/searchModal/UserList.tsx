@@ -9,9 +9,10 @@ import useUsersStore from "@/stores/usersStore";
 
 interface UserListProps {
   user: User;
+  token: string;
 }
 
-const UserList: React.FC<UserListProps> = ({ user }) => {
+const UserList: React.FC<UserListProps> = ({ user, token }) => {
   const { user: currUser } = useUserStore();
   const { setRooms, rooms } = useRoomStore();
   const { setUsers, users } = useUsersStore();
@@ -23,6 +24,7 @@ const UserList: React.FC<UserListProps> = ({ user }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           users: [user._id, currUser?._id],

@@ -14,10 +14,14 @@ import { Message } from "@/stores/messageStore";
 const ChatSpace = () => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Array<Message>>([]);
+  const [token, setToken] = useState<string>("");
   const [chatUser, setChatUser] = useState<User>();
+
   const { currentRoom, rooms } = useRoomStore();
   const { users } = useUsersStore();
   const { user } = useUserStore();
+
+  const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -33,6 +37,8 @@ const ChatSpace = () => {
   }, [user]);
 
   useEffect(() => {
+    setToken(localStorage.getItem("token") || "");
+
     async function fetchMessages() {
       const resp = await fetch(
         process.env.NEXT_PUBLIC_SERVER_URI + "/messages",
@@ -40,6 +46,7 @@ const ChatSpace = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
             chatId: currentRoom ? currentRoom._id : "",
           },
         }
@@ -57,7 +64,13 @@ const ChatSpace = () => {
     if (currentRoom) {
       fetchMessages();
     }
-  }, [currentRoom]);
+  }, [currentRoom, token]);
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  });
 
   socket.on("recieve_message", (data: Message) => {
     if (data.chat == currentRoom?._id) setMessages([...messages, data]);
@@ -79,6 +92,7 @@ const ChatSpace = () => {
         }),
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
       }
     );
@@ -104,17 +118,6 @@ const ChatSpace = () => {
       toaster("error", "Message can't be empty");
     }
   }
-
-  const display = function (e: Message, i: number) {
-    return (
-      <div
-        key={i}
-        className={e.sender == user?._id ? styles.sent : styles.recieved}
-      >
-        {e.content}
-      </div>
-    );
-  };
 
   function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
@@ -154,8 +157,33 @@ const ChatSpace = () => {
 
           <hr className={styles.infoDivider} />
 
-          <div className={styles.chatsContainer}>
-            {messages && messages.map(display)}
+          <div className={styles.chatsContainer} ref={chatRef}>
+            {messages &&
+              messages.map((e, i) => {
+                const time = new Date(e.created_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                return (
+                  <div
+                    key={i}
+                    className={
+                      e.sender == user?._id
+                        ? styles.sentContainer
+                        : ""
+                    }
+                  >
+                    <span>{time}</span>
+                    <div
+                      className={
+                        e.sender == user?._id ? styles.sent : styles.recieved
+                      }
+                    >
+                      {e.content}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
 
           <div className={styles.inputContainer}>
@@ -172,7 +200,7 @@ const ChatSpace = () => {
           </div>
         </div>
       ) : (
-        <div>Lets start chatting</div>
+        <h1 className={styles.noChatMsg}>Lets start chatting</h1>
       )}
     </div>
   );
