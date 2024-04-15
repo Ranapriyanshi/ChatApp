@@ -22,7 +22,7 @@ async function login(req, res) {
     $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
   });
   if (!user) {
-    return res.status(400).json({ msg: "User does not exist" });
+    return res.status(400).json({ msg: "User does not exist. Please sign up to create your account" });
   }
 
   // Check if password is correct
@@ -166,8 +166,37 @@ async function getUsers(req, res) {
   res.json({ users: resUsers });
 }
 
-// async function updateUser(req, res) {
+async function updateUser(req, res) {
+  const { f_name, l_name, username, email, pic, password } = req.body;
 
-// }
+  const user = await User.findById(req.params.id);
 
-export { login, tokenLogin, signup, searchUser, getUsers };
+  if (!user) {
+    return res.status(404).json({ msg: "User not found" });
+  }
+  if (!password) {
+    return res.status(400).json({ msg: "Password required" });
+  }
+
+  const match = await compare(password, user.password);
+
+  if (!match) {
+    return res.status(400).json({ msg: "Incorrect password" });
+  }
+
+  if (f_name) user.f_name = f_name;
+  if (l_name) user.l_name = l_name;
+  if (username) user.username = username;
+  if (email) user.email = email;
+  if (pic) user.pic = pic;
+
+  user.save();
+  const resUser = user.toJSON();
+  delete resUser.password;
+  delete resUser.created_at;
+  delete resUser.__v;
+
+  return res.status(200).json({ user: resUser });
+}
+
+export { login, tokenLogin, signup, searchUser, getUsers, updateUser };

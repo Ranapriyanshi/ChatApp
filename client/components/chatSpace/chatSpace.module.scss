@@ -32,9 +32,13 @@
     align-items: center;
     padding: 0 20px;
 
-    img {
+    .avatar {
         border-radius: 50%;
-        background: white;
+        cursor: pointer;
+        
+        &:hover {
+            scale: 1.05;
+        }
     }
 
     h1 {
@@ -46,6 +50,24 @@
     display: flex;
     align-items: center;
     gap: 15px;
+
+    .logout {
+        all: unset;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 8px;
+        font-size: 0.9em;
+        font-weight: 500;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover {
+            scale: 1.05;
+        }
+    }
 }
 
 // Navbar which containes chat info
@@ -71,6 +93,16 @@
     flex-direction: column;
     gap: 5px;
     overflow-y: auto;
+
+    .chatTimings {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+
+        h4 {
+            text-align: center;
+        }
+    }
 
     div {
         width: fit-content;

@@ -76,8 +76,8 @@
         width: 80%;
         height: 40px;
         margin: 10px 0;
-        padding: 10px;
         font-size: 1em;
+        padding: 10px;
         border: none;
         border-radius: 5px;
         color: white;
@@ -85,9 +85,17 @@
         cursor: pointer;
         transition: all 0.5s;
         border: 1px solid var(--grey-color);
-
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
         &:hover {
             background-color: #045abb;
+        }
+        
+        &:disabled {
+            padding: 0;
+            background-color: var(--placeholder-color);
         }
     }
 }
