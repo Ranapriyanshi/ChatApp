@@ -17,7 +17,7 @@ const UserList: React.FC<UserListProps> = ({ user, token }) => {
   const { setRooms, rooms } = useRoomStore();
   const { setUsers, users } = useUsersStore();
 
-  async function handleClick() {
+  async function handleAdd() {
     const resp = await fetch(
       process.env.NEXT_PUBLIC_SERVER_URI + "/chats/create",
       {
@@ -42,13 +42,22 @@ const UserList: React.FC<UserListProps> = ({ user, token }) => {
     }
   }
 
+  function handleAlreadyAdded() {
+    toaster("warning", "User is already added");
+  }
+
   return (
     <div className={styles.user}>
       <div className={styles.details}>
         <Image src={image} alt="" height={30} width={30} />
         <p>{user.username}</p>
-        <button onClick={handleClick}>+</button>
       </div>
+      <button
+        onClick={users.includes(user) ? handleAdd : handleAlreadyAdded}
+        className={styles.addBtn}
+      >
+        {users.includes(user) ? "+" : "-"}
+      </button>
     </div>
   );
 };

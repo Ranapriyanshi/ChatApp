@@ -1,0 +1,79 @@
+.editableContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+
+    .imageContainer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40%;
+        margin-bottom: 20px;
+
+        img {
+            border-radius: 50%;
+            margin-right: 20px;
+        }
+    }
+    
+    .inputContainer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 40%;
+        margin-bottom: 20px;
+    
+        span {
+            margin-right: 10px;
+        }
+    }
+}
+
+.detailsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+
+    img {
+        margin-bottom: 20px;
+        border-radius: 50%;
+    }
+
+    .details {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40%;
+        margin-bottom: 20px;
+
+        span {
+            margin-right: 10px;
+        }
+    }
+}
+
+.btnContainer {
+    display: flex;
+    gap: 10px;
+
+    .btn {
+        all: unset;
+        background-color: var(--blue-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+
+        &:hover {
+            scale: 1.05;
+        }
+    }
+}

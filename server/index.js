@@ -17,7 +17,6 @@ const server = createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.CLIENT_ORIGIN,
-    methods: ["GET", "POST"],
   },
 });
 
@@ -31,7 +30,6 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN,
-    methods: ["GET", "POST"],
   })
 );
 

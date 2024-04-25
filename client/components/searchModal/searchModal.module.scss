@@ -48,7 +48,7 @@
     .user {
         display: flex;
         align-items: center;
-        /* justify-content: space-between; */
+        justify-content: space-between;
         padding: 10px;
         width: 95%;
         border-radius: 6px;
@@ -58,6 +58,20 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .addBtn {
+            all: unset;
+            padding: 3px 10px;
+            background-color: var(--grey-color);
+            font-size: 1.3em;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            
+            &:hover {
+                scale: 1.05;
+            }
         }
     }
 }

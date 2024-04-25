@@ -38,7 +38,7 @@ const ChatList: React.FC<ChatListProps> = ({
     setToken(localStorage.getItem("token") || "");
 
     const id = room?.messages[room.messages.length - 1];
-    if (id) {
+    if (id && token) {
       fetch(process.env.NEXT_PUBLIC_SERVER_URI + `/messages/${id}`, {
         method: "GET",
         headers: {

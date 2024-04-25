@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useUserStore from "@/stores/userStore";
 import styles from "./login.module.scss";
 import { toaster } from "../../utils";
 import Input from "@/components/Input/Input";
-import image from "@/public/channels4_profile.jpg";
 import usernameImage from "@/public/Account.png";
 import passwordImage from "@/public/Password.png";
 import emailImage from "@/public/Email.png";
 import eyeImage from "@/public/Eye.png";
 import closedEyeImage from "@/public/Closed Eye.png";
+import { PulseLoader } from "react-spinners";
+import { useRouter } from "next/navigation";
+import { ToastContainer } from "react-toastify";
 
 const Login = () => {
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
@@ -21,12 +23,34 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [eye, setEye] = useState<Record<string, boolean>>({
     pass1: true,
     pass2: true,
     pass3: true,
   });
   const { setUser } = useUserStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    async function fetchData() {
+      const resp = await fetch(process.env.NEXT_PUBLIC_SOCKET_URI + "", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (resp.ok) router.push("/");
+    }
+
+    if (token) {
+      fetchData();
+    }
+  }, [router]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>, type: string) {
     if (type === "firstName") setFirstName(e.target.value);
@@ -45,6 +69,8 @@ const Login = () => {
   }
 
   async function handleSignupSubmit() {
+    setLoading(true);
+
     if (password !== confirmPassword) {
       toaster("error", "Passwords do not match");
       return;
@@ -69,13 +95,15 @@ const Login = () => {
 
     const data = await resp.json();
 
-    if (data.msg) {
+    if (!resp.ok) {
       toaster("error", data.msg);
+      setLoading(false);
     } else {
       toaster("success", "Account created successfully!");
       setUser(data.user);
       localStorage.setItem("token", data.token);
-      window.location.href = "/";
+      router.push("/");
+      setLoading(false);
     }
   }
 
@@ -92,6 +120,7 @@ const Login = () => {
   }
 
   async function handleLoginSubmit() {
+    setLoading(true);
     const resp = await fetch(
       process.env.NEXT_PUBLIC_SERVER_URI + "/users/login",
       {
@@ -105,10 +134,12 @@ const Login = () => {
 
     const data = await resp.json();
 
-    if (data.msg) {
+    if (resp.status == 400) {
       toaster("error", data.msg);
+      setLoading(false);
     } else {
       setUser(data.user);
+      setLoading(false);
       localStorage.setItem("token", data.token);
       toaster("success", "Logged in successfully!");
       window.location.href = "/";
@@ -133,6 +164,7 @@ const Login = () => {
 
   return (
     <div className={styles.loginWrapper}>
+      <ToastContainer />
       <div className={styles.formsContainer}>
         <div className={isLogin ? styles.loginContainer : styles.disabled}>
           <div className={styles.textContainer}>
@@ -156,7 +188,9 @@ const Login = () => {
               suffixImg={eye["pass1"] ? eyeImage : closedEyeImage}
               onEyeClick={() => handleEyeClick("pass1")}
             />
-            <button onClick={handleLoginSubmit}>Submit</button>
+            <button onClick={handleLoginSubmit} disabled={loading}>
+              {!loading ? "Login" : <PulseLoader color="white" size={10} />}
+            </button>
             <div className={styles.switch}>
               <h4>
                 Don&apos;t have an account?{" "}
@@ -222,7 +256,9 @@ const Login = () => {
                 onEyeClick={() => handleEyeClick("pass3")}
               />
             </div>
-            <button onClick={handleSignupSubmit}>Submit</button>
+            <button onClick={handleSignupSubmit} disabled={loading}>
+              Signup
+            </button>
           </div>
           <div className={styles.switch}>
             <h4>

@@ -69,7 +69,7 @@ const ChatsNav = () => {
         toaster("error", data.msg);
       }
     }
-    if (user) {
+    if (user && token) {
       fetchChats();
     }
   }, [user, setRooms, setUsers, token]);
