@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed": "node scripts/seedUsers.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
